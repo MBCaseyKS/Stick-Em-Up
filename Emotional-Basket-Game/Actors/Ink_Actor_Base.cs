@@ -87,6 +87,19 @@ namespace EmotionalBasketGame.Actors
         public Ink_MusicManager MusicManager { get => Game.MusicManager; }
 
         /// <summary>
+        /// Gets and/or sets the world's screen offset.
+        /// </summary>
+        public Vector2 ScreenOffset
+        {
+            get => World != null ? World.ScreenOffset : Vector2.Zero;
+            set
+            {
+                if (World != null)
+                    World.ScreenOffset = value;
+            }
+        }
+
+        /// <summary>
         /// Loads the actor's content.
         /// </summary>
         /// <param name="content">The content manager.</param>
@@ -174,7 +187,14 @@ namespace EmotionalBasketGame.Actors
         /// Returns the screen position of this actor.
         /// </summary>
         /// <returns>The adjusted screen position.</returns>
-        public Vector2 GetScreenPosition() => GetScreenCenter() + Position * GetScreenScale() * GetDepthOffsetMulti();
+        public Vector2 GetScreenPosition(bool applyOffset = true)
+        {
+            Vector2 currentPos = Position;
+            if (applyOffset)
+                currentPos -= ScreenOffset;
+
+            return GetScreenCenter() + currentPos * GetScreenScale() * GetDepthOffsetMulti();
+        }
 
         /// <summary>
         /// Returns how an actor should be scaled with depth.

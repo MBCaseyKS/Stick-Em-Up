@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EmotionalBasketGame.Screens;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,24 @@ namespace EmotionalBasketGame.Actors.Buttons
         /// </summary>
         public Ink_PinGameManager Game { get; set; }
 
+        /// <summary>
+        /// The world.
+        /// </summary>
+        public Ink_GameScreen_Base World { get; set; }
+
+        /// <summary>
+        /// Gets and/or sets the world's screen offset.
+        /// </summary>
+        public Vector2 ScreenOffset
+        {
+            get => World != null ? World.ScreenOffset : Vector2.Zero;
+            set
+            {
+                if (World != null)
+                    World.ScreenOffset = value;
+            }
+        }
+
         private List<Ink_Button_Base> _buttons;
         private MouseState prevMouseState, currentMouseState;
 
@@ -27,9 +46,11 @@ namespace EmotionalBasketGame.Actors.Buttons
         /// Initializes the handler with the actors array, to filter and optimize on creation.
         /// </summary>
         /// <param name="actors"></param>
-        public Ink_ButtonHandler(Ink_PinGameManager Game, List<Ink_Actor_Base> actors)
+        public Ink_ButtonHandler(Ink_PinGameManager Game, Ink_GameScreen_Base World, List<Ink_Actor_Base> actors)
         {
             this.Game = Game;
+            this.World = World;
+
             _buttons = new List<Ink_Button_Base>();
             foreach (var actor in actors)
             {
@@ -50,8 +71,9 @@ namespace EmotionalBasketGame.Actors.Buttons
             Vector2 screenCenter = Game.GetScreenCenter();
             float screenScale = Game.GetScreenScale();
 
-            float x = (currentMouseState.X - screenCenter.X) / screenScale;
-            float y = (currentMouseState.Y - screenCenter.Y) / screenScale;
+            Vector2 screenOffset = ScreenOffset;
+            float x = (currentMouseState.X - screenCenter.X) / screenScale + screenOffset.X;
+            float y = (currentMouseState.Y - screenCenter.Y) / screenScale + screenOffset.Y;
             Vector2 mousePos = new Vector2(x, y);
 
             Ink_Button_Base newHoveredButton = null;

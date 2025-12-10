@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.Xna.Framework;
 
 namespace EmotionalBasketGame
 {
@@ -70,5 +66,22 @@ namespace EmotionalBasketGame
         /// <param name="linearAlpha">The alpha.</param>
         /// <returns>The eased alpha.</returns>
         public static float EaseOutCubic(float linearAlpha) => (float)(1 - Math.Pow(1 - linearAlpha, 3));
+
+        /// <summary>
+        /// Lerps between two Vector2s.
+        /// </summary>
+        /// <param name="A">The first vector.</param>
+        /// <param name="B">The second vector.</param>
+        /// <param name="alpha">The percent from A to B.</param>
+        /// <returns></returns>
+        public static Vector2 VLerp(Vector2 A, Vector2 B, float alpha) => new Vector2(MathHelper.Lerp(A.X, B.X, alpha), MathHelper.Lerp(A.Y, B.Y, alpha));
+
+        /// <summary>
+        /// Gets the distance between two vectors.
+        /// </summary>
+        /// <param name="A">The first vector.</param>
+        /// <param name="B">The second vector.</param>
+        /// <returns></returns>
+        public static float VSize(Vector2 A, Vector2 B) => (float)Math.Sqrt(Math.Pow(B.X - A.X, 2f) + Math.Pow(B.Y - A.Y, 2f));
     }
 }

@@ -50,6 +50,7 @@ namespace EmotionalBasketGame.Actors
             float x = (currentMouseState.X - screenCenter.X) / screenScale;
             float y = (currentMouseState.Y - screenCenter.Y) / screenScale;
             Vector2 mousePos = new Vector2(x, y);
+
             Position = mousePos;
         }
 
@@ -66,7 +67,7 @@ namespace EmotionalBasketGame.Actors
 
             if (Math.Abs(Position.X) > 640 || Math.Abs(Position.Y) > 360) return;
 
-            Vector2 position = GetScreenPosition();
+            Vector2 position = GetScreenPosition(false);
             Rectangle source = new Rectangle(isMouseHeld ? 256 : 0, 0, 256, 256);
             spriteBatch.Draw(_mouseTexture, position, source, Color.White, 0, Vector2.Zero, 0.25f * screenScale, SpriteEffects.None, 0f);
         }

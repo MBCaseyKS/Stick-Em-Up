@@ -50,6 +50,11 @@ namespace EmotionalBasketGame.Screens
         /// </summary>
         public Color BackgroundColor { get; set; } = Color.White;
 
+        /// <summary>
+        /// The offset a screen might have.
+        /// </summary>
+        public Vector2 ScreenOffset { get; set; }
+
         // Handles drawing the background.
         protected Texture2D backgroundTexture;
 

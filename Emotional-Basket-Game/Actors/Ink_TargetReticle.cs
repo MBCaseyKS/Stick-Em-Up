@@ -49,8 +49,8 @@ namespace EmotionalBasketGame.Actors
             Vector2 screenCenter = GetScreenCenter();
             float screenScale = GetScreenScale();
 
-            float x = MathHelper.Clamp((currentMouseState.X - screenCenter.X) / screenScale, -600, 600);
-            float y = MathHelper.Clamp((currentMouseState.Y - screenCenter.Y) / screenScale, -320, 320);
+            float x = MathHelper.Clamp((currentMouseState.X - screenCenter.X) / screenScale, -600, 600) + ScreenOffset.X;
+            float y = MathHelper.Clamp((currentMouseState.Y - screenCenter.Y) / screenScale, -320, 320) + ScreenOffset.Y;
             Vector2 mousePos = new Vector2(x, y);
             Position = mousePos;
 

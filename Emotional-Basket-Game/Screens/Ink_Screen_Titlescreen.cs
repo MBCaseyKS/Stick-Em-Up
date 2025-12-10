@@ -29,6 +29,10 @@ namespace EmotionalBasketGame.Screens
         private double introProgress;
         private double skipAlpha;
 
+        // X = The amount of offset the mouse needs to have from the center.
+        // Y = The actual amount the screen is moved.
+        private Vector2 ScreenOffsetMultiplier = new Vector2(300, 50);
+
         /// <summary>
         /// A blend state used to simulate the darkness.
         /// </summary>
@@ -63,11 +67,11 @@ namespace EmotionalBasketGame.Screens
             createdByTexture = Content.Load<Texture2D>("T2D_CreatedBy");
             InitSoundInstance(content, "WAV_SwitchOn", out switchOnInst);
 
-            AddLight(new Ink_PointLight(Color.White, "T2D_Spotlight", 6.0f), new Vector2(-256, 0), true, 1, this);
-
             AddActor(new Ink_Button_Square(new Vector2(200, 200), buttonPathName: "T2D_PostItButton", clickSoundPathName: "WAV_Button_Joyous", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: OnStart), new Vector2(-256,0));
 
-            desk = (Ink_Desk_Intro)AddActor(new Ink_Desk_Intro(), new Vector2(50, -350), true, 1);
+            AddLight(new Ink_PointLight(Color.White, "T2D_Spotlight", 6.0f), new Vector2(-256, 0), true, 0, this);
+
+            desk = (Ink_Desk_Intro)AddActor(new Ink_Desk_Intro(), new Vector2(50, -350), true, 0);
             if (desk != null)
                 desk.TargetGlow = AddLight(new Ink_PointLight(Color.Yellow, "T2D_Spotlight", 2.0f), new Vector2(50, -256), true, 0, desk);
 
@@ -131,12 +135,41 @@ namespace EmotionalBasketGame.Screens
             }
             if (prev < 8 && introProgress >= 8)
             {
-                mouse = AddActor(new Ink_MouseRep(), Vector2.Zero, true, -1);
-                AddActor(new Ink_Button_HiddenSound("WAV_Boop", 16), new Vector2(300, 256));
-                AddActor(new Ink_Button_HiddenSound("WAV_Boop", 16), new Vector2(280, -180));
-                AddActor(new Ink_Button_HiddenSound("WAV_Boop", 16), new Vector2(580, -170));
+                AddActor(new Ink_Button_HiddenSound("WAV_Boop", 16), new Vector2(310, 256));
+                AddActor(new Ink_Button_HiddenSound("WAV_Boop", 16), new Vector2(290, -180));
+                AddActor(new Ink_Button_HiddenSound("WAV_Boop", 16), new Vector2(600, -170));
 
-                buttonHandler = new Ink_ButtonHandler(Game, Actors);
+                buttonHandler = new Ink_ButtonHandler(Game, this, Actors);
+                mouse = AddActor(new Ink_MouseRep(), Vector2.Zero, true, 0);
+            }
+
+            if (introProgress >= 8)
+            {
+                //Handles the visual offset of moving the mouse around.
+                if (ScreenOffsetMultiplier.X > 0 && ScreenOffsetMultiplier.Y > 0)
+                {
+                    Vector2 goalOffset = Vector2.Zero;
+
+                    if (mouse != null)
+                    {
+                        Vector2 screenCenter = GetScreenCenter();
+                        float screenScale = GetScreenScale();
+
+                        float x = (currentMouseState.X - screenCenter.X) / screenScale;
+                        float y = (currentMouseState.Y - screenCenter.Y) / screenScale;
+                        Vector2 mousePos = new Vector2(x, y);
+
+                        float dist = (float)Math.Sqrt(Math.Pow(mousePos.X, 2) + Math.Pow(mousePos.Y, 2));
+                        float alpha = Ink_Math.EaseOutCubic(Math.Min(dist / ScreenOffsetMultiplier.X, 1.0f));
+
+                        Vector2 normalizedPos = mousePos;
+                        normalizedPos.Normalize();
+
+                        goalOffset = normalizedPos * ScreenOffsetMultiplier.Y * alpha;
+                    }
+
+                    ScreenOffset = Ink_Math.VLerp(ScreenOffset, goalOffset, (float)(1.0f - Math.Pow(0.5, delta*10)));
+                }
             }
 
             if (buttonHandler != null)
@@ -239,11 +272,12 @@ namespace EmotionalBasketGame.Screens
             buttonHandler.CleanUp();
             buttonHandler = null;
             DestroyActor(mouse);
+            mouse = null;
 
             MusicManager.StopTrack("Titlescreen", 0.5);
             MusicManager.StopTrack("Titlescreen_Skipped", 0.5);
 
-            Game.RunLoad(this, new Ink_Screen_Minigame(Game), new Ink_ScreenTransition_Shutters(Game, 0.5, 3, Color.Black), new Ink_ScreenTransition_Fade(Game, 1.0, Color.Black), 0.5);
+            Game.RunLoad(this, new Ink_Screen_Minigame(Game), new Ink_ScreenTransition_Shutters(Game, 0.5, 3, Color.Black), new Ink_ScreenTransition_Fade(Game, 0.5, Color.Black), 0.5);
 
             return true;
         }
@@ -253,7 +287,7 @@ namespace EmotionalBasketGame.Screens
             actor = base.AddActor(actor, actorPosition, doLoad, depth);
 
             if (actor is Ink_Button_Base button && buttonHandler != null)
-                buttonHandler = new Ink_ButtonHandler(Game, Actors);
+                buttonHandler = new Ink_ButtonHandler(Game, this, Actors);
 
             return actor;
         }
