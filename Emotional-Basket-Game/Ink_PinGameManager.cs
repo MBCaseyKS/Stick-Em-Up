@@ -1,0 +1,138 @@
+﻿using EmotionalBasketGame.Screens;
+using EmotionalBasketGame.Transitions;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using System;
+using System.Collections.Generic;
+
+namespace EmotionalBasketGame
+{
+    public class Ink_PinGameManager : Game
+    {
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+        private Ink_LoadHandler _loadHandler;
+
+        private List<Ink_GameScreen_Base> _screens;
+
+        public Ink_MusicManager MusicManager { get; private set; }
+
+        public Ink_PinGameManager()
+        {
+            Window.Title = "Stick 'Em Up";
+
+            // Set to 720p
+            _graphics = new GraphicsDeviceManager(this);
+            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = 720;
+            //_graphics.PreferredBackBufferWidth = 1920;
+            //_graphics.PreferredBackBufferHeight = 1080;
+            _graphics.ApplyChanges();
+
+            _screens = new();
+            Content.RootDirectory = "Content";
+        }
+
+        /// <summary>
+        /// Returns the scale of the screen.
+        /// </summary>
+        /// <returns>The scale of the screen.</returns>
+        public float GetScreenScale() => Math.Min(_graphics.PreferredBackBufferWidth / 1280f, _graphics.PreferredBackBufferHeight / 720f);
+
+        /// <summary>
+        /// Returns the center of the screen.
+        /// </summary>
+        /// <returns>The center vector of the screen.</returns>
+        public Vector2 GetScreenCenter() => new Vector2(GraphicsDevice.Viewport.Bounds.Width / 2, GraphicsDevice.Viewport.Bounds.Height / 2);
+
+        protected override void Initialize()
+        {
+            base.Initialize();
+        }
+
+        /// <summary>
+        /// Sets up a new screen.
+        /// </summary>
+        /// <param name="screen">The screen to add.</param>
+        /// <param name="doLoad">Whether or not to load content.</param>
+        public void AddScreen(Ink_GameScreen_Base screen, bool doLoad)
+        {
+            _screens.Add(screen);
+            if (doLoad)
+                screen.LoadContent(_graphics.GraphicsDevice, Content);
+        }
+
+        /// <summary>
+        /// Removes a screen.
+        /// </summary>
+        /// <param name="screen">The screen to add.</param>
+        public void RemoveScreen(Ink_GameScreen_Base screen)
+        {
+            screen.OnRemoved();
+            _screens.Remove(screen);
+        }
+
+        /// <summary>
+        /// Sets up a new screen.
+        /// </summary>
+        /// <param name="screen">The screen to add.</param>
+        public void AddScreen(Ink_GameScreen_Base screen) => AddScreen(screen, true);
+
+        /// <summary>
+        /// Starts a new load.
+        /// </summary>
+        /// <param name="oldScreen">The screen to transition out of.</param>
+        /// <param name="newScreen">The screen to transition into.</param>
+        /// <param name="inTransition">Handles going IN to the transition.</param>
+        /// <param name="outTransition">Handles going OUT of the transition.</param>
+        /// <param name="freezeTime">The amount of time to wait after a load has completed before de-loading.</param>
+        public void RunLoad(Ink_GameScreen_Base oldScreen, Ink_GameScreen_Base newScreen, Ink_ScreenTransition_Base inTransition, Ink_ScreenTransition_Base outTransition, double freezeTime = 0.5)
+        {
+            if (_loadHandler != null)
+                _loadHandler.RunLoad(oldScreen, newScreen, inTransition, outTransition, freezeTime);
+        }
+
+        protected override void LoadContent()
+        {
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            MusicManager = new(Content);
+            _loadHandler = new(this);
+
+            AddScreen(new Ink_Screen_Titlescreen(this), false);
+
+            //Loads content for all existing screens.
+            foreach (Ink_GameScreen_Base screen in _screens)
+                screen.LoadContent(_graphics.GraphicsDevice, Content);
+        }
+
+        protected override void Update(GameTime gameTime)
+        {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
+
+            MusicManager?.Update(gameTime);
+            _loadHandler?.Update(gameTime);
+
+            //Updates each screen
+            foreach (Ink_GameScreen_Base screen in _screens)
+                screen.Update(gameTime);
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.Black);
+
+            //Draws each screen.
+            foreach (Ink_GameScreen_Base screen in _screens)
+                screen.Draw(_spriteBatch, gameTime);
+
+            _loadHandler?.Draw(_spriteBatch, gameTime);
+
+            base.Draw(gameTime);
+        }
+    }
+}

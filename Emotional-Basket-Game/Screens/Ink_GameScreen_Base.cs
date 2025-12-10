@@ -1,5 +1,6 @@
 ﻿using EmotionalBasketGame.Actors;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -27,7 +28,7 @@ namespace EmotionalBasketGame.Screens
         /// <summary>
         /// The game manager.
         /// </summary>
-        public EmotionalBasketGame Game { get; set; }
+        public Ink_PinGameManager Game { get; set; }
 
         /// <summary>
         /// The content manager.
@@ -35,14 +36,24 @@ namespace EmotionalBasketGame.Screens
         public ContentManager Content { get; set; }
 
         /// <summary>
+        /// Gets the game's music manager.
+        /// </summary>
+        public Ink_MusicManager MusicManager { get => Game.MusicManager; }
+
+        /// <summary>
+        /// Gets the game's music manager.
+        /// </summary>
+        public GraphicsDevice GraphicsDevice { get => Game.GraphicsDevice; }
+
+        /// <summary>
         /// The background color.
         /// </summary>
         public Color BackgroundColor { get; set; } = Color.White;
 
         // Handles drawing the background.
-        Texture2D backgroundTexture;
+        protected Texture2D backgroundTexture;
 
-        public Ink_GameScreen_Base(EmotionalBasketGame game)
+        public Ink_GameScreen_Base(Ink_PinGameManager game)
         {
             Game = game;
             _actors = new List<Ink_Actor_Base>();
@@ -65,10 +76,18 @@ namespace EmotionalBasketGame.Screens
         }
 
         /// <summary>
+        /// Is called when the screen is removed from the game.
+        /// </summary>
+        public virtual void OnRemoved()
+        {
+            
+        }
+
+        /// <summary>
         /// Spawns an actor and adds it to the list.
         /// </summary>
         /// <param name="actor">The actor to initialize.</param>
-        public Ink_Actor_Base AddActor(Ink_Actor_Base actor, Vector2 actorPosition, bool doLoad, int depth)
+        public virtual Ink_Actor_Base AddActor(Ink_Actor_Base actor, Vector2 actorPosition, bool doLoad, int depth)
         {
             actor.Game = Game;
             actor.World = this;
@@ -93,6 +112,11 @@ namespace EmotionalBasketGame.Screens
         /// </summary>
         /// <param name="actor"></param>
         public Ink_Actor_Base AddActor(Ink_Actor_Base actor, Vector2 actorPosition) => AddActor(actor, actorPosition, true, 0);
+
+        /// <summary>
+        /// Spawns an actor and adds it to the list.
+        /// </summary>
+        public Ink_Actor_Base AddActor(Ink_Actor_Base actor) => AddActor(actor, Vector2.Zero, true, 0);
 
         /// <summary>
         /// Destroys an actor.
@@ -155,6 +179,37 @@ namespace EmotionalBasketGame.Screens
             float screenScale = GetScreenScale();
             Rectangle rect = new(0, 0, (int)(1280 * screenScale), (int)(720 * screenScale));
             return rect;
+        }
+
+        /// <summary>
+        /// Inits a soundeffectinstance, so we do not need to store the SoundEffect itself.
+        /// </summary>
+        /// <param name="content">The content manager.</param>
+        /// <param name="fileName">The file name for the sound sample.</param>
+        /// <param name="inst">The instance variable that will be filled.</param>
+        public void InitSoundInstance(ContentManager content, string fileName, out SoundEffectInstance inst)
+        {
+            inst = null;
+            SoundEffect sound = content.Load<SoundEffect>(fileName);
+            if (sound != null)
+                inst = sound.CreateInstance();
+        }
+
+        /// <summary>
+        /// A condensed form of playing a soundeffect instance.
+        /// </summary>
+        /// <param name="inst">The instance.</param>
+        /// <param name="volume">The volume.</param
+        /// <param name="pitch">The pitch.</param>
+        /// <param name="bLooping">Whether or not to loop the instance.</param>
+        public void PlaySoundInst(SoundEffectInstance inst, float volume = 1.0f, float pitch = 1.0f, bool bLooping = false)
+        {
+            if (inst == null) return;
+
+            inst.Volume = volume;
+            inst.Pitch = pitch;
+            inst.IsLooped = bLooping;
+            inst.Play();
         }
     }
 }

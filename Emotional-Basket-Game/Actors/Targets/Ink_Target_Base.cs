@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.CompilerServices;
@@ -11,10 +12,9 @@ namespace EmotionalBasketGame.Actors.Targets
     public class Ink_Target_Base : Ink_Actor_Base
     {
         private Texture2D targetTexture;
+        private SoundEffectInstance impactSoundInst;
 
         double animProgress;
-
-        bool wasDamaged;
 
         /// <summary>
         /// This actor's collision.
@@ -31,7 +31,7 @@ namespace EmotionalBasketGame.Actors.Targets
         /// </summary>
         public Ink_Target_Base()
         {
-            Hitbox = new BoundingCircle(this, 32);
+            Hitbox = new BoundingCircle(this, 36);
         }
 
         /// <summary>
@@ -41,6 +41,8 @@ namespace EmotionalBasketGame.Actors.Targets
         public override void LoadContent(ContentManager content)
         {
             targetTexture = content.Load<Texture2D>("T2D_Target");
+
+            InitSoundInstance(content, "WAV_TargetHit", out impactSoundInst);
         }
 
 
@@ -83,7 +85,30 @@ namespace EmotionalBasketGame.Actors.Targets
             WasPinned = true;
             BasedActor = dart;
             Depth = dart.Depth + 1; //So we'll always be "behind" the dart.
+            PlaySoundInst(impactSoundInst, 0.5f, Ink_RandomHelper.RandRange(-0.2f, 0.2f)); //Some variation.
+
+            if (AreAllTargetsPinned())
+                MusicManager.SetTrackLayer("Drive", 1);
+
             return false;
+        }
+
+        /// <summary>
+        /// Gets whether or not all targets have been pinned.
+        /// </summary>
+        /// <returns>Whether or not all targets have been pinned.</returns>
+        public bool AreAllTargetsPinned()
+        {
+            foreach (Ink_Actor_Base actor in World.Actors)
+            {
+                if (actor is Ink_Target_Base target)
+                {
+                    if (!target.WasPinned)
+                        return false;
+                }
+            }
+
+            return true;
         }
     }
 }

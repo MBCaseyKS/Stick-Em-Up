@@ -1,1 +1,16 @@
-﻿All assets (currently) created by me, Max Casey.
+﻿All visual assets (that aren't listed here) are created by me, Max Casey.
+Easing functions provided by Unity.
+
+Wood texture by Wuzzy - https://openclipart.org/detail/240277/wood-texture
+
+Throwing / Whip Effect by denao270 -- https://freesound.org/s/346373/ -- License: Creative Commons 0
+Regular Arrow Shot by brendan89 -- https://freesound.org/s/321552/ -- License: Attribution 3.0 (Modifications Made)
+boing.wav by BranRainey -- https://freesound.org/s/108737/ -- License: Creative Commons 0
+Wine Glass Hit Eb5 by spectral9 -- https://freesound.org/s/255662/ -- License: Creative Commons 0
+Party noise maker _ soundstack.wav new yeears eve, party, horn, party favor by soundstack -- https://freesound.org/s/203246/ -- License: Creative Commons 0
+Kill Switch (Large Breaker Switch) .WAV by EchoCinematics -- https://freesound.org/s/131599/ -- License: Creative Commons 0
+
+Other sfx created on https://www.bfxr.net/
+
+Drive by Zane Little - https://freemusicarchive.org/music/zane-little/new-peach-radio/drive-3/ -- License: CC0 1.0 Universal
+Old Tricks by Zane Little - https://freemusicarchive.org/music/zane-little/another-bag-of-chips/old-tricks/ -- License: CC0 1.0 Universal

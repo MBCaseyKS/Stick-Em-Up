@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 using System;
 using EmotionalBasketGame.Actors.Targets;
+using Microsoft.Xna.Framework.Audio;
 
 namespace EmotionalBasketGame.Actors
 {
@@ -19,17 +20,11 @@ namespace EmotionalBasketGame.Actors
 
         private Texture2D dartTexture;
 
-        private Color[] dartColors = 
-        {
-            Color.IndianRed,
-            Color.Orange,
-            Color.LightGoldenrodYellow,
-            Color.DarkOliveGreen,
-            Color.LightBlue,
-            Color.DarkViolet
-        };
+        private SoundEffectInstance throwSoundInst;
+        private SoundEffectInstance stickSoundInst;
 
-        private Color paintedColor;
+        private int randomColor;
+        private double downwardVelocity;
 
         /// <summary>
         /// Whether or not the dart should be thrown.
@@ -66,8 +61,12 @@ namespace EmotionalBasketGame.Actors
                 if (prevDepth < -1 && Depth >= -1)
                     StrikeAllTargetsInRange();
                 if (Depth >= 32)
+                    EndThrow();
+                else if (Depth >= 0)
                 {
-                    IsThrowing = false;
+                    downwardVelocity += 4000 * gameTime.ElapsedGameTime.TotalSeconds * 0.5;
+                    Position = Position + new Vector2(0, (float)(downwardVelocity * gameTime.ElapsedGameTime.TotalSeconds));
+                    downwardVelocity += 4000 * gameTime.ElapsedGameTime.TotalSeconds * 0.5; //Heard this fixes some lag issues doing it this way?
                 }
             }
         }
@@ -96,14 +95,37 @@ namespace EmotionalBasketGame.Actors
         }
 
         /// <summary>
+        /// Is called at the start of a dart being thrown.
+        /// </summary>
+        public void BeginThrow(float chargeAlpha)
+        {
+            IsThrowing = true;
+            ThrowSpeed = MathHelper.Lerp(256, 384, chargeAlpha); //Up to 1.5x throw speed, depending on charge.
+            PlaySoundInst(throwSoundInst, MathHelper.Lerp(0.75f, 1.0f, chargeAlpha), 
+                MathHelper.Lerp(-0.25f, 0.25f, chargeAlpha) + Ink_RandomHelper.RandRange(-0.1f, 0.1f)); //Higher pitch for stronger throws, plus some variation.
+        }
+
+        /// <summary>
+        /// Is called upon the dart ending its throw.
+        /// </summary>
+        public void EndThrow()
+        {
+            IsThrowing = false;
+            PlaySoundInst(stickSoundInst, 0.2f, Ink_RandomHelper.RandRange(-0.15f, 0.15f)); //Some variation.
+        }
+
+        /// <summary>
         /// Loads the actor's content.
         /// </summary>
         /// <param name="content">The content manager.</param>
         public override void LoadContent(ContentManager content)
         {
             System.Random rand = new System.Random();
-            paintedColor = dartColors[rand.Next(dartColors.Length)];
+            randomColor = rand.Next(8);
             dartTexture = content.Load<Texture2D>("T2D_Pin");
+
+            InitSoundInstance(content, "WAV_WhipThrow", out throwSoundInst);
+            InitSoundInstance(content, "WAV_ArrowShot", out stickSoundInst);
         }
 
         /// <summary>
@@ -117,7 +139,7 @@ namespace EmotionalBasketGame.Actors
 
             //Calculate all the depth values.
             float depthAlpha = MathHelper.Lerp(1.0f, 0.0f, MathHelper.Max((float)(Depth / -32), 0));
-            Color dartColor = new Color(paintedColor.R * depthAlpha, paintedColor.G * depthAlpha, paintedColor.B * depthAlpha, 1.0f * depthAlpha);
+            Color dartColor = new Color(1.0f * depthAlpha, 1.0f * depthAlpha, 1.0f * depthAlpha, 1.0f * depthAlpha);
             Vector2 position = GetScreenPosition();
             float actorScale = GetScreenScale() * GetDepthScale();
 
@@ -127,7 +149,8 @@ namespace EmotionalBasketGame.Actors
             float angle = (float)System.Math.Atan2(-angleVector.X, angleVector.Y);
 
             //Finally, draw the dart. FINALLY.
-            spriteBatch.Draw(dartTexture, position, null, dartColor, angle, new Vector2(256, 256), 0.25f * actorScale, SpriteEffects.None, 0f);
+            Rectangle source = new Rectangle((randomColor % 4) * 256, (randomColor / 4) * 256, 256, 256);
+            spriteBatch.Draw(dartTexture, position, source, dartColor, angle, new Vector2(128, 128), 0.5f * actorScale, SpriteEffects.None, 0f);
         }
     }
 }

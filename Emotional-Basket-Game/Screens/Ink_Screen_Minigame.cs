@@ -10,7 +10,7 @@ namespace EmotionalBasketGame.Screens
 {
     public class Ink_Screen_Minigame : Ink_GameScreen_Base
     {
-        public Ink_Screen_Minigame(EmotionalBasketGame game) : base(game)
+        public Ink_Screen_Minigame(Ink_PinGameManager game) : base(game)
         {
             BackgroundColor = Color.LightGray;
         }
@@ -30,6 +30,14 @@ namespace EmotionalBasketGame.Screens
             AddActor(new Ink_Target_Base(), new Vector2((float)rand.NextDouble() * 1240 - 620, (float)rand.NextDouble() * 680 - 340), true, 1);
             AddActor(new Ink_Target_Base(), new Vector2((float)rand.NextDouble() * 1240 - 620, (float)rand.NextDouble() * 680 - 340), true, 1);
             AddActor(new Ink_Target_Base(), new Vector2((float)rand.NextDouble() * 1240 - 620, (float)rand.NextDouble() * 680 - 340), true, 1);
+            AddActor(new Ink_Target_Base(), new Vector2((float)rand.NextDouble() * 1240 - 620, (float)rand.NextDouble() * 680 - 340), true, 1);
+            AddActor(new Ink_Target_Base(), new Vector2((float)rand.NextDouble() * 1240 - 620, (float)rand.NextDouble() * 680 - 340), true, 1);
+
+            MusicManager.AddMusicNode([
+                ([("Music/WAV_Drive_Normal_Loop", -1)], 0.1, 0.5),
+                ([("Music/WAV_Drive_Muffled_Loop", -1)], 0.1, 0.3)],
+                key: "Drive",
+                nodeFadeTime: 1.0);
         }
     }
 }

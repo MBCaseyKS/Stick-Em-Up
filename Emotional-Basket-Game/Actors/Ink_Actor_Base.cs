@@ -1,5 +1,6 @@
 ﻿using EmotionalBasketGame.Screens;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -73,12 +74,17 @@ namespace EmotionalBasketGame.Actors
         /// <summary>
         /// The game.
         /// </summary>
-        public EmotionalBasketGame Game { get; set; }
+        public Ink_PinGameManager Game { get; set; }
 
         /// <summary>
         /// The world.
         /// </summary>
         public Ink_GameScreen_Base World { get; set; }
+
+        /// <summary>
+        /// Gets the game's music manager.
+        /// </summary>
+        public Ink_MusicManager MusicManager { get => Game.MusicManager; }
 
         /// <summary>
         /// Loads the actor's content.
@@ -111,6 +117,48 @@ namespace EmotionalBasketGame.Actors
         }
 
         /// <summary>
+        /// Inits a soundeffectinstance, so we do not need to store the SoundEffect itself.
+        /// </summary>
+        /// <param name="content">The content manager.</param>
+        /// <param name="fileName">The file name for the sound sample.</param>
+        /// <param name="inst">The instance variable that will be filled.</param>
+        public void InitSoundInstance(ContentManager content, string fileName, out SoundEffectInstance inst)
+        {
+            inst = null;
+            SoundEffect sound = content.Load<SoundEffect>(fileName);
+            if (sound != null)
+                inst = sound.CreateInstance();
+        }
+
+        /// <summary>
+        /// A condensed form of playing a soundeffect instance.
+        /// </summary>
+        /// <param name="inst">The instance.</param>
+        /// <param name="volume">The volume.</param
+        /// <param name="pitch">The pitch.</param>
+        /// <param name="bLooping">Whether or not to loop the instance.</param>
+        public void PlaySoundInst(SoundEffectInstance inst, float volume = 1.0f, float pitch = 1.0f, bool bLooping = false)
+        {
+            if (inst == null) return;
+            if (inst.State == SoundState.Playing) return;
+
+            volume = MathHelper.Clamp(volume, 0.0f, 1.0f);
+            inst.Volume = volume;
+            inst.Pitch = pitch;
+            inst.IsLooped = bLooping;
+
+            inst.Play();
+        }
+
+        /// <summary>
+        /// A condensed form of playing a soundeffect instance.
+        /// </summary>
+        /// <param name="inst">The instance.</param>
+        /// <param name="volume">The volume.</param
+        /// <param name="pitch">The pitch.</param>
+        public void PlaySoundInst(SoundEffectInstance inst, float volume = 1.0f, float pitch = 1.0f) => PlaySoundInst(inst, volume, pitch, false);
+
+        /// <summary>
         /// Returns the scale of the screen.
         /// </summary>
         /// <returns>The scale of the screen.</returns>
@@ -135,9 +183,9 @@ namespace EmotionalBasketGame.Actors
         public float GetDepthScale()
         {
             if (Depth < 0)
-                return 1.0f + (float)(Math.Abs(Depth) / 8);
+                return 1.0f + (float)(Math.Abs(Depth) / 32);
 
-            return 1.0f / (1.0f + (float)(Depth / 32));
+            return 1.0f / (1.0f + (float)(Depth / 64));
         }
 
         /// <summary>
@@ -147,9 +195,9 @@ namespace EmotionalBasketGame.Actors
         public float GetDepthOffsetMulti()
         {
             if (Depth < 0)
-                return 1.0f + (float)(Math.Abs(Depth) / 128);
+                return 1.0f + (float)(Math.Abs(Depth) / 32);
 
-            return 1.0f / (1.0f + (float)(Depth / 256));
+            return 1.0f / (1.0f + (float)(Depth / 64));
         }
 
         /// <summary>
