@@ -1,4 +1,5 @@
-﻿using EmotionalBasketGame.Screens;
+﻿using EmotionalBasketGame.Actors.HUDs;
+using EmotionalBasketGame.Screens;
 using EmotionalBasketGame.Transitions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EmotionalBasketGame
 {
@@ -16,6 +18,7 @@ namespace EmotionalBasketGame
         private Ink_LoadHandler _loadHandler;
 
         private List<Ink_GameScreen_Base> _screens;
+        private List<Ink_HUD_Base> _hudElements;
 
         public Ink_MusicManager MusicManager { get; private set; }
 
@@ -25,13 +28,14 @@ namespace EmotionalBasketGame
 
             // Set to 720p
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.PreferredBackBufferWidth = 1280;
-            _graphics.PreferredBackBufferHeight = 720;
-            //_graphics.PreferredBackBufferWidth = 1920;
-            //_graphics.PreferredBackBufferHeight = 1080;
+            //_graphics.PreferredBackBufferWidth = 1280;
+            //_graphics.PreferredBackBufferHeight = 720;
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
             _graphics.ApplyChanges();
 
             _screens = new();
+            _hudElements = new();
             Content.RootDirectory = "Content";
         }
 
@@ -94,6 +98,29 @@ namespace EmotionalBasketGame
                 _loadHandler.RunLoad(oldScreen, newScreen, inTransition, outTransition, freezeTime);
         }
 
+        /// <summary>
+        /// Opens a HUD element for the game.
+        /// </summary>
+        /// <param name="InHUD">The HUD to add.</param>
+        /// <returns>The HUD once modified.</returns>
+        public Ink_HUD_Base OpenHUD(Ink_HUD_Base InHUD)
+        {
+            if (_hudElements.IndexOf(InHUD) <= -1)
+                _hudElements.Add(InHUD);
+
+            InHUD.LoadContent(GraphicsDevice, Content);
+            return InHUD;
+        }
+
+        /// <summary>
+        /// Removes a HUD from the game.
+        /// </summary>
+        /// <param name="InHUD">The HUD to remove.</param>
+        public void CloseHUD(Ink_HUD_Base InHUD)
+        {
+            _hudElements.Remove(InHUD);
+        }
+
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -119,6 +146,10 @@ namespace EmotionalBasketGame
             foreach (Ink_GameScreen_Base screen in _screens)
                 screen.Update(gameTime);
 
+            var huds = _hudElements.ToArray();
+            foreach (var hud in huds)
+                hud.Update(gameTime);
+
             base.Update(gameTime);
         }
 
@@ -131,6 +162,21 @@ namespace EmotionalBasketGame
                 screen.Draw(_spriteBatch, gameTime);
 
             _loadHandler?.Draw(_spriteBatch, gameTime);
+
+            if (_hudElements.Count > 0)
+            {
+                Matrix transform = Matrix.CreateScale(GetScreenScale());
+                _spriteBatch.Begin(transformMatrix: transform);
+
+                var hudGroups = _hudElements.ToArray().GroupBy(h => h.RenderPriority).OrderBy(g => g.Key).ToArray();
+                foreach (var group in hudGroups)
+                {
+                    foreach (var hud in group)
+                        hud.Draw(_spriteBatch, gameTime);
+                }
+
+                _spriteBatch.End();
+            }    
 
             base.Draw(gameTime);
         }

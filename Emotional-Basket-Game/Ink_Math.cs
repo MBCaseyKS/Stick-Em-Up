@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EmotionalBasketGame
 {
@@ -83,5 +84,12 @@ namespace EmotionalBasketGame
         /// <param name="B">The second vector.</param>
         /// <returns></returns>
         public static float VSize(Vector2 A, Vector2 B) => (float)Math.Sqrt(Math.Pow(B.X - A.X, 2f) + Math.Pow(B.Y - A.Y, 2f));
+
+        /// <summary>
+        /// A modification of the Unity ease in out cubic function provided.
+        /// </summary>
+        /// <param name="linearAlpha">The alpha.</param>
+        /// <returns>The eased alpha.</returns>
+        public static float EaseInOutCubic(float linearAlpha) => linearAlpha < 0.5f ? 4f * (float)Math.Pow(linearAlpha, 3f) : 1f - (float)Math.Pow(-2f * linearAlpha + 2f, 3f) / 2f;
     }
 }

@@ -77,12 +77,15 @@ namespace EmotionalBasketGame.Actors.Buttons
             Vector2 mousePos = new Vector2(x, y);
 
             Ink_Button_Base newHoveredButton = null;
-            foreach (var button in _buttons)
+            if (Game.IsActive)
             {
-                if (button.IsInRange(mousePos))
+                foreach (var button in _buttons)
                 {
-                    newHoveredButton = button;
-                    break;
+                    if (button.IsInRange(mousePos))
+                    {
+                        newHoveredButton = button;
+                        break;
+                    }
                 }
             }
 

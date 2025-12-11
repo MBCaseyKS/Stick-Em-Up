@@ -1,58 +1,51 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EmotionalBasketGame.Screens;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SharpDX.Direct3D9;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmotionalBasketGame.Actors
+namespace EmotionalBasketGame.Actors.HUDs
 {
     /// <summary>
-    /// Follows the mouse, and allows you to throw darts.
+    /// Follows the mouse when it's on screen.
     /// </summary>
-    public class Ink_TargetReticle : Ink_Actor_Base
+    public class Ink_HUD_TargetReticle : Ink_HUD_Base
     {
+        private Vector2 currentPosition;
+        private Texture2D _mouseTexture;
         private Texture2D _indicatorTexture;
         private SoundEffectInstance chargeSoundInst;
 
-        MouseState currentMouseState, previousMouseState;
+        MouseState currentMouseState;
 
         private bool isCharging;
         private double chargeProgress = -1.0;
 
-        /// <summary>
-        /// Loads the actor's content.
-        /// </summary>
-        /// <param name="content">The content manager.</param>
-        public override void LoadContent(ContentManager content)
+        public Ink_HUD_TargetReticle(Ink_PinGameManager game, Ink_GameScreen_Base activeScreen, int renderPriority = 0) : base(game, activeScreen, renderPriority) { }
+
+        public override void LoadContent(GraphicsDevice graphics, ContentManager content)
         {
             _indicatorTexture = content.Load<Texture2D>("T2D_Reticle");
             InitSoundInstance(content, "WAV_ThrowCharge", out chargeSoundInst);
         }
 
-        /// <summary>
-        /// Updates the actor, as in a Tick.
-        /// </summary>
-        /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
-            previousMouseState = currentMouseState;
             currentMouseState = Mouse.GetState();
 
             Vector2 screenCenter = GetScreenCenter();
             float screenScale = GetScreenScale();
 
-            float x = MathHelper.Clamp((currentMouseState.X - screenCenter.X) / screenScale, -600, 600) + ScreenOffset.X;
-            float y = MathHelper.Clamp((currentMouseState.Y - screenCenter.Y) / screenScale, -320, 320) + ScreenOffset.Y;
+            float x = MathHelper.Clamp((currentMouseState.X - screenCenter.X) / screenScale, -600, 600);
+            float y = MathHelper.Clamp((currentMouseState.Y - screenCenter.Y) / screenScale, -320, 320);
             Vector2 mousePos = new Vector2(x, y);
-            Position = mousePos;
+            currentPosition = mousePos;
 
             if (Game.IsActive && currentMouseState.LeftButton == ButtonState.Pressed && (isCharging || chargeProgress < 0))
             {
@@ -96,12 +89,12 @@ namespace EmotionalBasketGame.Actors
         /// <returns>The constructed dart.</returns>
         public Ink_Dart ThrowDart()
         {
-            if (World != null)
+            if (ActiveScreen != null)
             {
                 float chargeAlpha = (float)Math.Pow(Math.Max(chargeProgress, 0), 3);
                 float offsetMax = MathHelper.Lerp(100, 0, chargeAlpha);
                 Vector2 randOffset = Ink_RandomHelper.VRand(offsetMax);
-                Ink_Dart dart = (Ink_Dart)World.AddActor(new Ink_Dart(), Position + randOffset, true, -32);
+                Ink_Dart dart = (Ink_Dart)ActiveScreen.AddActor(new Ink_Dart(), currentPosition + ActiveScreen.ScreenOffset + randOffset, true, -32);
                 if (dart != null)
                 {
                     dart.BeginThrow(chargeAlpha);
@@ -112,40 +105,32 @@ namespace EmotionalBasketGame.Actors
             return null;
         }
 
-        /// <summary>
-        /// Updates the actor's visuals.
-        /// </summary>
-        /// <param name="gameTime">Game time.</param>
-        /// <param name="spriteBatch">The sprite batch provided.</param>
-        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            base.Draw(gameTime, spriteBatch);
-
             //Draw the lower indicator.
             Color indicatorColor = new Color(255, 55, 55, 55);
-            Vector2 position = GetScreenPosition();
-            float screenScale = GetScreenScale();
+            Vector2 position = new Vector2(640, 360) + currentPosition;
 
             float chargeAlpha = (float)Math.Pow(Math.Max(chargeProgress, 0), 3);
-            Vector2 randomVect = Ink_RandomHelper.VRand(1.0f * 1.5f * screenScale * chargeAlpha);
+            Vector2 randomVect = Ink_RandomHelper.VRand(1.0f * 1.5f * chargeAlpha);
 
             for (int i = 0; i < 4; i++)
             {
                 float angle = i * MathHelper.PiOver2;
-                Vector2 offset = randomVect + Vector2.Transform(new Vector2(0, -5 * screenScale), Matrix.CreateRotationZ(angle));
-                spriteBatch.Draw(_indicatorTexture, position + offset, null, indicatorColor, angle, new Vector2(256, 256), 0.25f * screenScale, SpriteEffects.None, 0f);
+                Vector2 offset = randomVect + Vector2.Transform(new Vector2(0, -5), Matrix.CreateRotationZ(angle));
+                spriteBatch.Draw(_indicatorTexture, position + offset, null, indicatorColor, angle, new Vector2(256, 256), 0.25f, SpriteEffects.None, 0f);
             }
 
             if (chargeProgress >= 0)
             {
-                float addOffset = MathHelper.Lerp(-45, -5, chargeAlpha) * screenScale;
+                float addOffset = MathHelper.Lerp(-45, -5, chargeAlpha);
                 indicatorColor = new Color(1, 0.05f, 0.05f, MathHelper.Lerp(0, 0.75f, chargeAlpha));
 
                 for (int i = 0; i < 4; i++)
                 {
                     float angle = i * MathHelper.PiOver2;
                     Vector2 offset = randomVect + Vector2.Transform(new Vector2(0, addOffset), Matrix.CreateRotationZ(angle));
-                    spriteBatch.Draw(_indicatorTexture, position + offset, null, indicatorColor, angle, new Vector2(256, 256), 0.25f * screenScale, SpriteEffects.None, 0f);
+                    spriteBatch.Draw(_indicatorTexture, position + offset, null, indicatorColor, angle, new Vector2(256, 256), 0.25f, SpriteEffects.None, 0f);
                 }
             }
         }

@@ -5,6 +5,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 using System;
 using EmotionalBasketGame.Actors.Targets;
 using Microsoft.Xna.Framework.Audio;
+using EmotionalBasketGame.Screens;
 
 namespace EmotionalBasketGame.Actors
 {
@@ -22,6 +23,7 @@ namespace EmotionalBasketGame.Actors
 
         private SoundEffectInstance throwSoundInst;
         private SoundEffectInstance stickSoundInst;
+        private SoundEffectInstance multiHitSoundInst;
 
         private int randomColor;
         private double downwardVelocity;
@@ -76,6 +78,7 @@ namespace EmotionalBasketGame.Actors
         /// </summary>
         public void StrikeAllTargetsInRange()
         {
+            int targetsHit = 0;
             foreach (Ink_Actor_Base actor in World.Actors)
             {
                 if (actor is Ink_Target_Base target)
@@ -84,13 +87,24 @@ namespace EmotionalBasketGame.Actors
 
                     if (CollisionHelper.Collides(Hitbox, target.Hitbox))
                     {
+                        targetsHit++;
                         if (target.OnPinned(this))
                         {
                             BasedActor = target;
                             IsThrowing = false;
+                            break;
                         }
                     }
                 }
+            }
+
+            if (targetsHit > 0)
+            {
+                int additionalTargets = Math.Max(targetsHit - 1, 0);
+                World.DoScreenShake(new Vector2(targetsHit > 1 ? 7.5f : 5f), 0.25f + additionalTargets * 0.25f, 0.1f, 0.1f + additionalTargets * 0.2f);
+
+                if (additionalTargets > 0)
+                    PlaySoundInst(multiHitSoundInst, 0.7f, Ink_RandomHelper.RandRange(-0.15f, 0.15f)); //Some variation.
             }
         }
 
@@ -126,6 +140,7 @@ namespace EmotionalBasketGame.Actors
 
             InitSoundInstance(content, "WAV_WhipThrow", out throwSoundInst);
             InitSoundInstance(content, "WAV_ArrowShot", out stickSoundInst);
+            InitSoundInstance(content, "WAV_Multihit", out multiHitSoundInst);
         }
 
         /// <summary>

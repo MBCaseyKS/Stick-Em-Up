@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EmotionalBasketGame.Screens;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -87,6 +88,8 @@ namespace EmotionalBasketGame.Actors.Targets
             Depth = dart.Depth + 1; //So we'll always be "behind" the dart.
             PlaySoundInst(impactSoundInst, 0.5f, Ink_RandomHelper.RandRange(-0.2f, 0.2f)); //Some variation.
 
+            if (World is Ink_Screen_Minigame minigame)
+                minigame.ScoreParticle.PlaceFirework(Position);
             if (AreAllTargetsPinned())
                 MusicManager.SetTrackLayer("Drive", 1);
 

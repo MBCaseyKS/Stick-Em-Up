@@ -100,6 +100,16 @@ namespace EmotionalBasketGame.Actors
         }
 
         /// <summary>
+        /// Sorts the actors and renders them in ascending order.
+        /// </summary>
+        public int RenderPriority { get; set; } = 0;
+
+        /// <summary>
+        /// The active screen offset.
+        /// </summary>
+        public Matrix ActiveOffset { get; set; } = Matrix.Identity;
+
+        /// <summary>
         /// Loads the actor's content.
         /// </summary>
         /// <param name="content">The content manager.</param>
@@ -267,6 +277,17 @@ namespace EmotionalBasketGame.Actors
         {
             Vector2 mousePos = GetMousePosition();
             return Math.Pow(radius, 2) <= Math.Pow(position.X - mousePos.X, 2) + Math.Pow(position.Y - mousePos.Y, 2);
+        }
+
+        /// <summary>
+        /// Returns if the SpriteBatch should be remade with a new blend state.
+        /// </summary>
+        /// <param name="blendState">The custom blend state to use.</param>
+        /// <returns>Returns if the SpriteBatch should be remade with a new blend state.</returns>
+        public virtual bool GetCustomBlend(out BlendState blendState)
+        {
+            blendState = null;
+            return false;
         }
     }
 }

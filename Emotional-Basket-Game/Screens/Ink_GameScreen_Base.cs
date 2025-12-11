@@ -1,4 +1,5 @@
 ﻿using EmotionalBasketGame.Actors;
+using EmotionalBasketGame.Actors.HUDs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -19,6 +20,8 @@ namespace EmotionalBasketGame.Screens
     public class Ink_GameScreen_Base
     {
         protected List<Ink_Actor_Base> _actors;
+        protected List<Ink_ScreenShake> _screenShakes;
+        private IEnumerable<IGrouping<int, Ink_Actor_Base>> _sortedActors;
 
         /// <summary>
         /// The actors on this screen.
@@ -62,6 +65,7 @@ namespace EmotionalBasketGame.Screens
         {
             Game = game;
             _actors = new List<Ink_Actor_Base>();
+            _screenShakes = new List<Ink_ScreenShake>();
         }
 
         /// <summary>
@@ -92,13 +96,15 @@ namespace EmotionalBasketGame.Screens
         /// Spawns an actor and adds it to the list.
         /// </summary>
         /// <param name="actor">The actor to initialize.</param>
-        public virtual Ink_Actor_Base AddActor(Ink_Actor_Base actor, Vector2 actorPosition, bool doLoad, int depth)
+        public virtual Ink_Actor_Base AddActor(Ink_Actor_Base actor, Vector2 actorPosition, bool doLoad, double depth = 0, int renderPriority = 0)
         {
             actor.Game = Game;
             actor.World = this;
             actor.Position = actorPosition;
             actor.Depth = depth;
+            actor.RenderPriority = renderPriority;
             _actors.Add(actor);
+            UpdateActorSorting();
 
             if (doLoad)
                 actor.LoadContent(Content);
@@ -130,6 +136,48 @@ namespace EmotionalBasketGame.Screens
         public void DestroyActor(Ink_Actor_Base actor)
         {
             _actors.Remove(actor);
+            UpdateActorSorting();
+        }
+
+        /// <summary>
+        /// Updates and sorts the sorted actors array.
+        /// </summary>
+        public void UpdateActorSorting()
+        {
+            _sortedActors = Actors
+                .GroupBy(w => w.RenderPriority)
+                .OrderBy(g => g.Key);
+        }
+
+        /// <summary>
+        /// Opens a HUD element for the game.
+        /// </summary>
+        /// <param name="InHUD"></param>
+        /// <returns></returns>
+        public Ink_HUD_Base OpenHUD(Ink_HUD_Base InHUD) => Game?.OpenHUD(InHUD);
+
+
+        /// <summary>
+        /// Removes a HUD from the game.
+        /// </summary>
+        /// <param name="InHUD">The HUD to remove.</param>
+        public void CloseHUD(Ink_HUD_Base InHUD) => Game?.CloseHUD(InHUD);
+
+        /// <summary>
+        /// Adds a new screen shake.
+        /// </summary>
+        /// <param name="intensity">The maximum offset of this shake.</param>
+        /// <param name="duration">How long this shake lasts.</param>
+        /// <param name="fadeIn">How long it takes for a shake to get to its maximum shake.</param>
+        /// <param name="fadeOut">How long it takes for a shake to fade out.</param>
+        /// <returns>The initialized screen shake.</returns>
+        public Ink_ScreenShake DoScreenShake(Vector2 intensity, float duration = 0.5f, float fadeIn = 0.1f, float fadeOut = 0.1f)
+        {
+            Ink_ScreenShake shake = new(intensity, duration, fadeIn, fadeOut);
+            if (shake != null)
+                _screenShakes.Add(shake);
+
+            return shake;
         }
 
         /// <summary>
@@ -143,6 +191,9 @@ namespace EmotionalBasketGame.Screens
 
             foreach (Ink_Actor_Base actor in currentActors)
                 actor.Update(gameTime);
+
+            if (_screenShakes.Count > 0)
+                _screenShakes = Ink_ScreenShake.UpdateAllShakes(_screenShakes, (float)gameTime.ElapsedGameTime.TotalSeconds);
         }
 
         /// <summary>
@@ -151,14 +202,40 @@ namespace EmotionalBasketGame.Screens
         /// <param name="gameTime">The game time.</param>
         public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.Begin();
+            Matrix transform = Matrix.Identity;
+            if (_screenShakes.Count > 0)
+            {
+                Vector2 shakeOffset = Ink_ScreenShake.GetShakeOffset(_screenShakes);
+                transform = Matrix.CreateTranslation(shakeOffset.X, shakeOffset.Y, 0);
+            }
+
+            spriteBatch.Begin(transformMatrix: transform);
 
             //Draw the BG
             spriteBatch.Draw(backgroundTexture, GetScreenRectangle(), BackgroundColor);
 
-            IEnumerable<Ink_Actor_Base> currentActors = _actors.ToArray().OrderByDescending(actor => actor.Depth);
-            foreach (Ink_Actor_Base actor in currentActors)
-                actor.Draw(gameTime, spriteBatch);
+            var sortedGroups = _sortedActors.ToArray();
+            foreach (var group in sortedGroups)
+            {
+                var depthSortedActors = group.ToArray().OrderByDescending(actor => actor.Depth);
+                foreach (Ink_Actor_Base actor in depthSortedActors)
+                {
+                    bool hasCustomBlend = actor.GetCustomBlend(out BlendState customState);
+                    if (hasCustomBlend)
+                    {
+                        spriteBatch.End();
+                        spriteBatch.Begin(transformMatrix: transform, blendState: customState);
+                    }
+
+                    actor.Draw(gameTime, spriteBatch);
+
+                    if (hasCustomBlend)
+                    {
+                        spriteBatch.End();
+                        spriteBatch.Begin(transformMatrix: transform);
+                    }
+                }
+            }
 
             spriteBatch.End();
         }
