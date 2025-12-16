@@ -205,7 +205,7 @@ namespace EmotionalBasketGame.Screens
             Matrix transform = Matrix.Identity;
             if (_screenShakes.Count > 0)
             {
-                Vector2 shakeOffset = Ink_ScreenShake.GetShakeOffset(_screenShakes);
+                Vector2 shakeOffset = Ink_ScreenShake.GetShakeOffset(_screenShakes) * GetScreenScale();
                 transform = Matrix.CreateTranslation(shakeOffset.X, shakeOffset.Y, 0);
             }
 
@@ -220,6 +220,8 @@ namespace EmotionalBasketGame.Screens
                 var depthSortedActors = group.ToArray().OrderByDescending(actor => actor.Depth);
                 foreach (Ink_Actor_Base actor in depthSortedActors)
                 {
+                    if (actor.IsHidden) continue;
+
                     bool hasCustomBlend = actor.GetCustomBlend(out BlendState customState);
                     if (hasCustomBlend)
                     {

@@ -27,7 +27,7 @@ namespace EmotionalBasketGame.Screens
 
         public Ink_Screen_Minigame(Ink_PinGameManager game) : base(game)
         {
-            BackgroundColor = Color.LightGray;
+            BackgroundColor = Color.Black;
             ScoreParticle = new Ink_Particle_Stars(game, 20, []);
         }
 
@@ -43,6 +43,8 @@ namespace EmotionalBasketGame.Screens
             System.Random rand = new System.Random();
             reticle = (Ink_HUD_TargetReticle)OpenHUD(new Ink_HUD_TargetReticle(Game, this, 1));
 
+            AddActor(new Ink_Actor_Billboard(), new Vector2(0, -128), true, 33, -1);
+            AddActor(new Ink_OfficeBackground("T_Map_OfficeBG.txt"), new Vector2(-1152, -616), true, 33, -2);
             AddActor(new Ink_Emitter(ScoreParticle), Vector2.Zero, true, 0, 1);
 
             for (int i = 0; i < 10; i++)

@@ -20,6 +20,11 @@ namespace EmotionalBasketGame.Actors
         protected double depth;
 
         /// <summary>
+        /// Whether or not the actor is hidden.
+        /// </summary>
+        public bool IsHidden { get; set; } = false;
+
+        /// <summary>
         /// The actor's position.
         /// </summary>
         public Vector2 Position

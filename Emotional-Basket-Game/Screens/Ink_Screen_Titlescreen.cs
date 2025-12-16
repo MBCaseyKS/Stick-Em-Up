@@ -23,6 +23,11 @@ namespace EmotionalBasketGame.Screens
         private Ink_ButtonHandler buttonHandler;
         private Ink_Desk_Intro desk;
         private Ink_HUD_Base mouse, createdBy;
+        private Ink_Actor_Base backButton;
+
+        private Vector2 currentScroll, prevScroll, goalScroll;
+        private Vector2 currentMouseScroll;
+        private double scrollProgress, scrollTime;
 
         private MouseState prevMouseState, currentMouseState;
 
@@ -65,7 +70,14 @@ namespace EmotionalBasketGame.Screens
 
             InitSoundInstance(content, "WAV_SwitchOn", out switchOnInst);
 
-            AddActor(new Ink_Button_Square(new Vector2(200, 200), buttonPathName: "T2D_PostItButton", clickSoundPathName: "WAV_Button_Joyous", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: OnStart), new Vector2(-256,0), true, renderPriority: 1);
+            AddActor(new Ink_Button_Square(new Vector2(200, 200), buttonPathName: "T2D_PostItButton", clickSoundPathName: "WAV_Button_Joyous", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: OnStart), new Vector2(-360,-128), true, renderPriority: 1);
+            AddActor(new Ink_Button_Circular(200f, buttonPathName: "T2D_Button_Settings", clickSoundPathName: "WAV_Button_Scroll", hoverSoundPathName: "WAV_Button_Hover", scale: 0.5f, buttonClickDel: MoveToSettings), new Vector2(0, 75), true, renderPriority: 1);
+
+            AddActor(new Ink_Config_Resolution() { ConfigLayer = 1 }, new Vector2(-400, -725), true, renderPriority: 1);
+            AddActor(new Ink_Config_FPS() { ConfigLayer = 1 }, new Vector2(-100, -725), true, renderPriority: 1);
+            AddActor(new Ink_Config_Fullscreen() { ConfigLayer = 1 }, new Vector2(-425, -575), true, renderPriority: 1);
+            AddActor(new Ink_Button_Square(new Vector2(200, 100), buttonPathName: "T2D_Button_SaveConfigs", clickSoundPathName: "WAV_Options_Progress", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: SaveConfigs, scale: 0.5f) { ButtonLayer = 1 }, new Vector2(-100, -500), true, renderPriority: 1);
+            backButton = AddActor(new Ink_Button_Square(new Vector2(200, 100), buttonPathName: "T2D_Button_Back", clickSoundPathName: "WAV_Button_Scroll", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: MoveToMain, scale: 0.5f) { ButtonLayer = 1, IsHidden = true }, new Vector2(-225, -400), true, renderPriority: 1);
 
             AddLight(new Ink_PointLight(Color.White, "T2D_Spotlight", 6.0f), new Vector2(-256, 0), true, 0, this);
 
@@ -139,6 +151,7 @@ namespace EmotionalBasketGame.Screens
 
                 buttonHandler = new Ink_ButtonHandler(Game, this, Actors);
                 mouse = OpenHUD(new Ink_HUD_PencilMouse(Game, this));
+                buttonHandler.MouseActive = true;
             }
 
             if (introProgress >= 8)
@@ -148,7 +161,21 @@ namespace EmotionalBasketGame.Screens
                 {
                     Vector2 goalOffset = Vector2.Zero;
 
-                    if (mouse != null)
+                    if (scrollProgress < scrollTime)
+                    {
+                        scrollProgress = Math.Min(scrollProgress + delta, scrollTime);
+                        float alpha = (float)(scrollProgress / scrollTime);
+                        currentScroll = Ink_Math.VLerp(prevScroll, goalScroll, Ink_Math.EaseOutBack(alpha));
+
+                        if (scrollProgress >= scrollTime)
+                        {
+                            mouse = OpenHUD(new Ink_HUD_PencilMouse(Game, this));
+                            buttonHandler.MouseActive = true;
+                            if (backButton != null)
+                                backButton.IsHidden = buttonHandler.SceneLayer != 1;
+                        }
+                    }
+                    else if (mouse != null)
                     {
                         Vector2 screenCenter = GetScreenCenter();
                         float screenScale = GetScreenScale();
@@ -166,7 +193,8 @@ namespace EmotionalBasketGame.Screens
                         goalOffset = normalizedPos * ScreenOffsetMultiplier.Y * alpha;
                     }
 
-                    ScreenOffset = Ink_Math.VLerp(ScreenOffset, goalOffset, (float)(1.0f - Math.Pow(0.5, delta*10)));
+                    currentMouseScroll = Ink_Math.VLerp(currentMouseScroll, goalOffset, (float)(1.0f - Math.Pow(0.5, delta*10)));
+                    ScreenOffset = currentMouseScroll + currentScroll;
                 }
             }
 
@@ -251,6 +279,66 @@ namespace EmotionalBasketGame.Screens
 
             Game.RunLoad(this, new Ink_Screen_Minigame(Game), new Ink_ScreenTransition_Shutters(Game, 0.5, 3, Color.Black), new Ink_ScreenTransition_Fade(Game, 0.5, Color.Black), 0.5);
 
+            return true;
+        }
+
+        /// <summary>
+        /// Handles when the "Back to Main" button is clicked.
+        /// </summary>
+        /// <param name="button">The button clicked.</param>
+        public bool MoveToMain(Ink_Button_Base button)
+        {
+            if (buttonHandler != null)
+                buttonHandler.SceneLayer = 0;
+
+            SetScroll(Vector2.Zero, 1.0);
+            return true;
+        }
+
+        /// <summary>
+        /// Handles when the "start" button is clicked.
+        /// </summary>
+        /// <param name="button">The button clicked.</param>
+        public bool MoveToSettings(Ink_Button_Base button)
+        {
+            if (buttonHandler != null)
+                buttonHandler.SceneLayer = 1;
+
+            SetScroll(new Vector2(-256, -650), 1.0);
+            return true;
+        }
+
+        /// <summary>
+        /// Sets the screen center scroll.
+        /// </summary>
+        /// <param name="newScroll"></param>
+        /// <param name="time"></param>
+        public void SetScroll(Vector2 newScroll, double time)
+        {
+            buttonHandler.MouseActive = false;
+            CloseHUD(mouse);
+            mouse = null;
+
+            prevScroll = currentScroll;
+            goalScroll = newScroll;
+            scrollProgress = 0;
+            scrollTime = time;
+        }
+
+
+        /// <summary>
+        /// Handles when the "Save Configs" button is clicked.
+        /// </summary>
+        /// <param name="button">The button clicked.</param>
+        public bool SaveConfigs(Ink_Button_Base button)
+        {
+            foreach (Ink_Actor_Base a in Actors)
+            {
+                if (a is Ink_ConfigHandler_Base handler)
+                    handler.ApplySettings();
+            }
+
+            Game.SaveSettings();
             return true;
         }
 

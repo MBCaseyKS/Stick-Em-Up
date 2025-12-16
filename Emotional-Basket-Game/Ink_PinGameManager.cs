@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Media;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 
 namespace EmotionalBasketGame
 {
@@ -16,6 +17,7 @@ namespace EmotionalBasketGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Ink_LoadHandler _loadHandler;
+        private Ink_SettingsHandler _settings;
 
         private List<Ink_GameScreen_Base> _screens;
         private List<Ink_HUD_Base> _hudElements;
@@ -28,11 +30,8 @@ namespace EmotionalBasketGame
 
             // Set to 720p
             _graphics = new GraphicsDeviceManager(this);
-            //_graphics.PreferredBackBufferWidth = 1280;
-            //_graphics.PreferredBackBufferHeight = 720;
-            _graphics.PreferredBackBufferWidth = 1920;
-            _graphics.PreferredBackBufferHeight = 1080;
-            _graphics.ApplyChanges();
+            _settings = new();
+            _settings.ApplyGraphicsSettings(this, _graphics);
 
             _screens = new();
             _hudElements = new();
@@ -119,6 +118,23 @@ namespace EmotionalBasketGame
         public void CloseHUD(Ink_HUD_Base InHUD)
         {
             _hudElements.Remove(InHUD);
+        }
+
+        /// <summary>
+        /// Gets the current game settings.
+        /// </summary>
+        /// <returns>The game settings.</returns>
+        public Ink_GameSettings GetSettings() => _settings?.GetSettings();
+
+        /// <summary>
+        /// Saves and applies the game settings.
+        /// </summary>
+        public void SaveSettings()
+        {
+            if (_settings == null) return;
+
+            _settings.ApplyGraphicsSettings(this, _graphics);
+            _settings.SaveSettings();
         }
 
         protected override void LoadContent()

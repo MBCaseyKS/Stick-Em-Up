@@ -1,16 +1,17 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
+﻿using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using System;
-using static EmotionalBasketGame.Actors.Ink_TargetRound_Layout;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static EmotionalBasketGame.Actors.Buttons.Ink_Button_Base;
 
 namespace EmotionalBasketGame.Actors.Buttons
 {
-    /// <summary>
-    /// A square button that handles click events.
-    /// </summary>
-    public class Ink_Button_Square : Ink_Button_Base
+    public class Ink_Button_Circular : Ink_Button_Base
     {
         /// <summary>
         /// The button scale.
@@ -21,15 +22,14 @@ namespace EmotionalBasketGame.Actors.Buttons
         private SoundEffectInstance onClickedSound;
         private Texture2D buttonTexture;
 
-        private Vector2 areaSize;
-        private Vector2 textureSize;
+        private float radius;
         private string buttonPathName, hoverSoundPathName, clickSoundPathName;
 
         private bool isHovered;
 
-        public Ink_Button_Square(Vector2 areaSize, string buttonPathName = "", string hoverSoundPathName = "", string clickSoundPathName = "", OnButtonClicked buttonClickDel = null, float scale = 1f)
+        public Ink_Button_Circular(float radius, string buttonPathName = "", string hoverSoundPathName = "", string clickSoundPathName = "", OnButtonClicked buttonClickDel = null, float scale = 1.0f)
         {
-            this.areaSize = areaSize;
+            this.radius = radius;
             this.buttonPathName = buttonPathName;
             this.hoverSoundPathName = hoverSoundPathName;
             this.clickSoundPathName = clickSoundPathName;
@@ -42,10 +42,7 @@ namespace EmotionalBasketGame.Actors.Buttons
             base.LoadContent(content);
 
             if (buttonPathName != "")
-            {
                 buttonTexture = content.Load<Texture2D>(buttonPathName);
-                textureSize = new Vector2(buttonTexture.Width, buttonTexture.Height);
-            }
             if (hoverSoundPathName != "")
                 InitSoundInstance(content, hoverSoundPathName, out onHoveredSound);
             if (clickSoundPathName != "")
@@ -59,14 +56,14 @@ namespace EmotionalBasketGame.Actors.Buttons
             if (buttonTexture != null)
             {
                 Vector2 position = GetScreenPosition();
-                float screenScale = GetScreenScale();
-                spriteBatch.Draw(buttonTexture, position, new Rectangle(isHovered ? ((int)(textureSize.X*0.5f)) : 0, 0, (int)(textureSize.X*0.5), (int)textureSize.Y), Color.White, 0, new Vector2(textureSize.X*0.25f, textureSize.Y*0.5f), screenScale * Scale, SpriteEffects.None, 0f);
+                float screenScale = GetScreenScale() * Scale;
+                spriteBatch.Draw(buttonTexture, position, new Rectangle(isHovered ? 512 : 0, 0, 512, 512), Color.White, 0, new Vector2(256, 256), screenScale, SpriteEffects.None, 0f);
             }
         }
 
         public override bool IsInRange(Vector2 mousePosition)
         {
-            return Math.Abs(mousePosition.X - Position.X) <= areaSize.X * 0.5 * Scale && Math.Abs(mousePosition.Y - Position.Y) <= areaSize.Y * 0.5 * Scale;
+            return radius <= 0 || Ink_Math.VSize(mousePosition, Position) <= radius * Scale;
         }
 
         public override bool OnClicked(Vector2 mousePosition)
@@ -77,8 +74,8 @@ namespace EmotionalBasketGame.Actors.Buttons
             return true;
         }
 
-        public override void OnHovered(Vector2 mousePosition) 
-        { 
+        public override void OnHovered(Vector2 mousePosition)
+        {
             isHovered = true;
             PlaySoundInst(onHoveredSound, Ink_RandomHelper.RandRange(0.5f, 0.6f), Ink_RandomHelper.RandRange(-0.1f, 0.1f));
         }

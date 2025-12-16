@@ -37,6 +37,16 @@ namespace EmotionalBasketGame.Actors.Buttons
             }
         }
 
+        /// <summary>
+        /// Whether or not the mouse is active.
+        /// </summary>
+        public bool MouseActive { get; set; }
+
+        /// <summary>
+        /// The scene's layer, used for button handling.
+        /// </summary>
+        public int SceneLayer { get; set; }
+
         private List<Ink_Button_Base> _buttons;
         private MouseState prevMouseState, currentMouseState;
 
@@ -77,15 +87,16 @@ namespace EmotionalBasketGame.Actors.Buttons
             Vector2 mousePos = new Vector2(x, y);
 
             Ink_Button_Base newHoveredButton = null;
-            if (Game.IsActive)
+            if (Game.IsActive && MouseActive)
             {
                 foreach (var button in _buttons)
                 {
-                    if (button.IsInRange(mousePos))
-                    {
-                        newHoveredButton = button;
-                        break;
-                    }
+                    if (button.IsHidden) continue;
+                    if (button.ButtonLayer != SceneLayer) continue;
+                    if (!button.IsInRange(mousePos)) continue;
+
+                    newHoveredButton = button;
+                    break;
                 }
             }
 

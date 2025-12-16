@@ -124,7 +124,7 @@ namespace EmotionalBasketGame.Actors.HUDs
             if (chargeProgress >= 0)
             {
                 float addOffset = MathHelper.Lerp(-45, -5, chargeAlpha);
-                indicatorColor = new Color(1, 0.05f, 0.05f, MathHelper.Lerp(0, 0.75f, chargeAlpha));
+                indicatorColor = new Color(255,25,25) * MathHelper.Lerp(0, 0.75f, chargeAlpha);
 
                 for (int i = 0; i < 4; i++)
                 {

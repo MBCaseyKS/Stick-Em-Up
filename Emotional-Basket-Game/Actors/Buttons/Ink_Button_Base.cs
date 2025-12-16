@@ -21,6 +21,11 @@ namespace EmotionalBasketGame.Actors.Buttons
         public OnButtonClicked buttonClickDel { get; set; }
 
         /// <summary>
+        /// The layer this button is on.
+        /// </summary>
+        public int ButtonLayer { get; set; } = 0;
+
+        /// <summary>
         /// Returns true if in range of the mouse.
         /// </summary>
         /// <param name="mousePosition">The mouse's position, scaled to the window size.</param>
