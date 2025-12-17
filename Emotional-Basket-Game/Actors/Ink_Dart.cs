@@ -6,6 +6,7 @@ using System;
 using EmotionalBasketGame.Actors.Targets;
 using Microsoft.Xna.Framework.Audio;
 using EmotionalBasketGame.Screens;
+using System.Reflection;
 
 namespace EmotionalBasketGame.Actors
 {
@@ -19,7 +20,8 @@ namespace EmotionalBasketGame.Actors
         /// </summary>
         public BoundingCircle Hitbox;
 
-        private Texture2D dartTexture;
+        private Model dartModel;
+        //private Texture2D dartTexture;
 
         private SoundEffectInstance throwSoundInst;
         private SoundEffectInstance stickSoundInst;
@@ -136,7 +138,8 @@ namespace EmotionalBasketGame.Actors
         {
             System.Random rand = new System.Random();
             randomColor = rand.Next(8);
-            dartTexture = content.Load<Texture2D>("T2D_Pin");
+            //dartTexture = content.Load<Texture2D>("T2D_Pin");
+            dartModel = content.Load<Model>("STM_PushPin");
 
             InitSoundInstance(content, "WAV_WhipThrow", out throwSoundInst);
             InitSoundInstance(content, "WAV_ArrowShot", out stickSoundInst);
@@ -152,6 +155,7 @@ namespace EmotionalBasketGame.Actors
         {
             base.Draw(gameTime, spriteBatch);
 
+            /*
             //Calculate all the depth values.
             float depthAlpha = MathHelper.Lerp(1.0f, 0.0f, MathHelper.Max((float)(Depth / -32), 0));
             Color dartColor = new Color(1.0f * depthAlpha, 1.0f * depthAlpha, 1.0f * depthAlpha, 1.0f * depthAlpha);
@@ -166,6 +170,27 @@ namespace EmotionalBasketGame.Actors
             //Finally, draw the dart. FINALLY.
             Rectangle source = new Rectangle((randomColor % 4) * 256, (randomColor / 4) * 256, 256, 256);
             spriteBatch.Draw(dartTexture, position, source, dartColor, angle, new Vector2(128, 128), 0.5f * actorScale, SpriteEffects.None, 0f);
+            */
+
+            if (dartModel != null && World.SceneCamera != null)
+            {
+                spriteBatch.End();
+
+                // Depth Buffer
+                DepthStencilState dss = new DepthStencilState();
+                dss.DepthBufferEnable = true;
+                World.GraphicsDevice.DepthStencilState = dss;
+
+
+                //X = positive is to the right, Y = positive is up, Z = negative is forwards
+                Matrix world = Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(new Vector3(Position.X / 9f, -Position.Y / 9f, (float)-Depth*5f));
+                //Matrix world = Matrix.CreateRotationX(MathHelper.PiOver2) * Matrix.CreateTranslation(Position.X, -Position.Y, (float)-Depth);
+                Matrix view = World.SceneCamera.View;
+                Matrix projection = World.SceneCamera.Projection;
+                dartModel.Draw(world, view, projection);
+
+                spriteBatch.Begin();
+            }
         }
     }
 }

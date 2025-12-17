@@ -94,7 +94,7 @@ namespace EmotionalBasketGame.Actors.HUDs
                 float chargeAlpha = (float)Math.Pow(Math.Max(chargeProgress, 0), 3);
                 float offsetMax = MathHelper.Lerp(100, 0, chargeAlpha);
                 Vector2 randOffset = Ink_RandomHelper.VRand(offsetMax);
-                Ink_Dart dart = (Ink_Dart)ActiveScreen.AddActor(new Ink_Dart(), currentPosition + ActiveScreen.ScreenOffset + randOffset, true, -32);
+                Ink_Dart dart = (Ink_Dart)ActiveScreen.AddActor(new Ink_Dart() { RenderPriority = 100 }, currentPosition + ActiveScreen.ScreenOffset + randOffset, true, -32);
                 if (dart != null)
                 {
                     dart.BeginThrow(chargeAlpha);

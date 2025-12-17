@@ -1,7 +1,11 @@
 ﻿All visual assets (that aren't listed here) are created by me, Max Casey.
 Easing functions provided by Unity.
 
-Wood texture by Wuzzy - https://openclipart.org/detail/240277/wood-texture
+Umeko by OriginType -- https://www.dafont.com/umeko-plum.font -- Noncommercial Use Only
+
+Wood texture by Wuzzy -- https://openclipart.org/detail/240277/wood-texture
+
+Push Pin Model -- https://www.thebasemesh.com/faq -- License: Creative Commons 0
 
 Throwing / Whip Effect by denao270 -- https://freesound.org/s/346373/ -- License: Creative Commons 0
 Regular Arrow Shot by brendan89 -- https://freesound.org/s/321552/ -- License: Attribution 3.0 (Modifications Made)

@@ -1,4 +1,5 @@
 ﻿using EmotionalBasketGame.Actors;
+using EmotionalBasketGame.Actors.Cameras;
 using EmotionalBasketGame.Actors.HUDs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -57,6 +58,11 @@ namespace EmotionalBasketGame.Screens
         /// The offset a screen might have.
         /// </summary>
         public Vector2 ScreenOffset { get; set; }
+
+        /// <summary>
+        /// A scene camera for 3D models.
+        /// </summary>
+        public ICamera SceneCamera { get; protected set; }
 
         // Handles drawing the background.
         protected Texture2D backgroundTexture;
@@ -192,6 +198,8 @@ namespace EmotionalBasketGame.Screens
             foreach (Ink_Actor_Base actor in currentActors)
                 actor.Update(gameTime);
 
+            if (SceneCamera != null)
+                SceneCamera.Update(gameTime);
             if (_screenShakes.Count > 0)
                 _screenShakes = Ink_ScreenShake.UpdateAllShakes(_screenShakes, (float)gameTime.ElapsedGameTime.TotalSeconds);
         }

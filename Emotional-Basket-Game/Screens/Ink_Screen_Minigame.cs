@@ -1,4 +1,5 @@
 ﻿using EmotionalBasketGame.Actors;
+using EmotionalBasketGame.Actors.Cameras;
 using EmotionalBasketGame.Actors.HUDs;
 using EmotionalBasketGame.Actors.Targets;
 using Microsoft.Xna.Framework;
@@ -39,6 +40,8 @@ namespace EmotionalBasketGame.Screens
         public override void LoadContent(GraphicsDevice graphics, ContentManager content)
         {
             base.LoadContent(graphics, content);
+
+            SceneCamera = new Ink_Camera_Movable(Game, new Vector3(0));
 
             System.Random rand = new System.Random();
             reticle = (Ink_HUD_TargetReticle)OpenHUD(new Ink_HUD_TargetReticle(Game, this, 1));
@@ -85,6 +88,11 @@ namespace EmotionalBasketGame.Screens
                 }
 
                 ScreenOffset = Ink_Math.VLerp(ScreenOffset, goalOffset, (float)(1.0f - Math.Pow(0.5, delta * 10)));
+
+                if (SceneCamera != null && SceneCamera is Ink_Camera_Movable cam)
+                {
+                    cam.SetPosition(new Vector3(ScreenOffset.X * 0.1f, ScreenOffset.Y * -0.1f, 0));
+                }
             }
         }
     }
