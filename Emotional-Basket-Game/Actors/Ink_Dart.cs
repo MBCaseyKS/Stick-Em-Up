@@ -20,6 +20,11 @@ namespace EmotionalBasketGame.Actors
         /// </summary>
         public BoundingCircle Hitbox;
 
+        /// <summary>
+        /// The round handler.
+        /// </summary>
+        public Ink_TargetRound_Layout RoundHandler { get; set; }
+
         private Texture2D dartTexture;
 
         private SoundEffectInstance throwSoundInst;
@@ -101,12 +106,17 @@ namespace EmotionalBasketGame.Actors
 
             if (targetsHit > 0)
             {
+                if (RoundHandler != null)
+                    RoundHandler.TargetsHit += targetsHit;
+
                 int additionalTargets = Math.Max(targetsHit - 1, 0);
                 World.DoScreenShake(new Vector2(targetsHit > 1 ? 7.5f : 5f), 0.25f + additionalTargets * 0.25f, 0.1f, 0.1f + additionalTargets * 0.2f);
 
                 if (additionalTargets > 0)
                     PlaySoundInst(multiHitSoundInst, 0.7f, Ink_RandomHelper.RandRange(-0.15f, 0.15f)); //Some variation.
             }
+            else if (RoundHandler != null)
+                RoundHandler.DartsMissed++;
         }
 
         /// <summary>

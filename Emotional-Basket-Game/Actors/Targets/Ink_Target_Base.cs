@@ -12,8 +12,30 @@ namespace EmotionalBasketGame.Actors.Targets
     /// </summary>
     public class Ink_Target_Base : Ink_Actor_Base
     {
-        private Texture2D targetTexture;
-        private SoundEffectInstance impactSoundInst;
+        /// <summary>
+        /// The tick rate of this target.
+        /// </summary>
+        public double SpeedMulti { get; set; } = 1.0;
+
+        /// <summary>
+        /// The scale of this target.
+        /// </summary>
+        public double ScaleMulti { get; set; } = 1.0;
+
+        /// <summary>
+        /// Is called when this target goes offscreen.
+        /// </summary>
+        /// <param name="target">The failing target.</param>
+        public delegate void OnFailed(Ink_Target_Base target);
+        
+        /// <summary>
+        /// Can be set to pick up when this target fails.
+        /// </summary>
+        public OnFailed FailedDel { get; set; }
+
+        protected Texture2D targetTexture;
+        protected SoundEffectInstance impactSoundInst;
+        protected SoundEffectInstance throwSoundInst;
 
         double animProgress;
 
@@ -30,9 +52,10 @@ namespace EmotionalBasketGame.Actors.Targets
         /// <summary>
         /// Creates a new target actor.
         /// </summary>
-        public Ink_Target_Base()
+        public Ink_Target_Base(double scaleMulti = 1.0)
         {
-            Hitbox = new BoundingCircle(this, 36);
+            ScaleMulti = scaleMulti;
+            Hitbox = new BoundingCircle(this, 36 * (float)scaleMulti);
         }
 
         /// <summary>
@@ -44,6 +67,7 @@ namespace EmotionalBasketGame.Actors.Targets
             targetTexture = content.Load<Texture2D>("T2D_Target");
 
             InitSoundInstance(content, "WAV_TargetHit", out impactSoundInst);
+            InitSoundInstance(content, "WAV_Target_Throw", out throwSoundInst);
         }
 
 
@@ -69,7 +93,7 @@ namespace EmotionalBasketGame.Actors.Targets
 
             //Draw the target.
             Vector2 position = GetScreenPosition();
-            float screenScale = GetScreenScale() * GetDepthScale();
+            float screenScale = (float)(GetScreenScale() * GetDepthScale() * ScaleMulti);
 
             int currFrame = (int)animProgress;
             var source = new Rectangle(currFrame * 512, WasPinned ? 512 : 0, 512, 512);
@@ -90,8 +114,8 @@ namespace EmotionalBasketGame.Actors.Targets
 
             if (World is Ink_Screen_Minigame minigame)
                 minigame.ScoreParticle.PlaceFirework(Position);
-            if (AreAllTargetsPinned())
-                MusicManager.SetTrackLayer("Drive", 1);
+            //if (AreAllTargetsPinned())
+                //MusicManager.SetTrackLayer("Drive", 1);
 
             return false;
         }

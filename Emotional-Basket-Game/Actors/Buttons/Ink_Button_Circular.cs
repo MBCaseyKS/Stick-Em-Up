@@ -18,14 +18,14 @@ namespace EmotionalBasketGame.Actors.Buttons
         /// </summary>
         public float Scale { get; set; } = 1.0f;
 
-        private SoundEffectInstance onHoveredSound;
-        private SoundEffectInstance onClickedSound;
-        private Texture2D buttonTexture;
+        protected SoundEffectInstance onHoveredSound;
+        protected SoundEffectInstance onClickedSound;
+        protected Texture2D buttonTexture;
 
-        private float radius;
-        private string buttonPathName, hoverSoundPathName, clickSoundPathName;
+        protected float radius;
+        protected string buttonPathName, hoverSoundPathName, clickSoundPathName;
 
-        private bool isHovered;
+        protected bool isHovered;
 
         public Ink_Button_Circular(float radius, string buttonPathName = "", string hoverSoundPathName = "", string clickSoundPathName = "", OnButtonClicked buttonClickDel = null, float scale = 1.0f)
         {

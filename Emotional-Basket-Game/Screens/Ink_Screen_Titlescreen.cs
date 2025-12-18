@@ -72,6 +72,7 @@ namespace EmotionalBasketGame.Screens
 
             AddActor(new Ink_Button_Square(new Vector2(200, 200), buttonPathName: "T2D_PostItButton", clickSoundPathName: "WAV_Button_Joyous", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: OnStart), new Vector2(-360,-128), true, renderPriority: 1);
             AddActor(new Ink_Button_Circular(200f, buttonPathName: "T2D_Button_Settings", clickSoundPathName: "WAV_Button_Scroll", hoverSoundPathName: "WAV_Button_Hover", scale: 0.5f, buttonClickDel: MoveToSettings), new Vector2(0, 75), true, renderPriority: 1);
+            AddActor(new Ink_Button_Bomb(150f, buttonPathName: "T2D_Button_Quit", clickSoundPathName: "WAV_Target_Miss", hoverSoundPathName: "WAV_Button_Hover", scale: 0.5f, buttonClickDel: OnQuit), new Vector2(-240, 150), true, renderPriority: 1);
 
             AddActor(new Ink_Config_Resolution() { ConfigLayer = 1 }, new Vector2(-400, -725), true, renderPriority: 1);
             AddActor(new Ink_Config_FPS() { ConfigLayer = 1 }, new Vector2(-100, -725), true, renderPriority: 1);
@@ -80,6 +81,7 @@ namespace EmotionalBasketGame.Screens
             backButton = AddActor(new Ink_Button_Square(new Vector2(200, 100), buttonPathName: "T2D_Button_Back", clickSoundPathName: "WAV_Button_Scroll", hoverSoundPathName: "WAV_Button_Hover", buttonClickDel: MoveToMain, scale: 0.5f) { ButtonLayer = 1, IsHidden = true }, new Vector2(-225, -400), true, renderPriority: 1);
 
             AddLight(new Ink_PointLight(Color.White, "T2D_Spotlight", 6.0f), new Vector2(-256, 0), true, 0, this);
+            AddLight(new Ink_PointLight(Color.White, "T2D_Spotlight", 4.0f), new Vector2(-256, -650), true, 0, this);
 
             createdBy = OpenHUD(new Ink_HUD_CreatedBy(Game, this));
 
@@ -325,7 +327,6 @@ namespace EmotionalBasketGame.Screens
             scrollTime = time;
         }
 
-
         /// <summary>
         /// Handles when the "Save Configs" button is clicked.
         /// </summary>
@@ -339,6 +340,16 @@ namespace EmotionalBasketGame.Screens
             }
 
             Game.SaveSettings();
+            return true;
+        }
+
+        /// <summary>
+        /// Handles when the "Quit" button is clicked.
+        /// </summary>
+        /// <param name="button">The button clicked.</param>
+        public bool OnQuit(Ink_Button_Base button)
+        {
+            Game.Exit();
             return true;
         }
 

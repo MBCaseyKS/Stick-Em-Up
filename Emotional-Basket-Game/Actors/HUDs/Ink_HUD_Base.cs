@@ -57,7 +57,7 @@ namespace EmotionalBasketGame.Actors.HUDs
         /// <summary>
         /// Closes the HUD itself.
         /// </summary>
-        public void DoClose()
+        public virtual void DoClose()
         {
             Game.CloseHUD(this);
         }

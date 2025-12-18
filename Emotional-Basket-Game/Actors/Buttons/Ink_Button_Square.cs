@@ -17,17 +17,25 @@ namespace EmotionalBasketGame.Actors.Buttons
         /// </summary>
         public float Scale { get; set; } = 1.0f;
 
-        private SoundEffectInstance onHoveredSound;
-        private SoundEffectInstance onClickedSound;
-        private Texture2D buttonTexture;
+        /// <summary>
+        /// A message to display over the button.
+        /// </summary>
+        public string ButtonMsg { get; protected set; } = "";
 
-        private Vector2 areaSize;
-        private Vector2 textureSize;
-        private string buttonPathName, hoverSoundPathName, clickSoundPathName;
+        protected SoundEffectInstance onHoveredSound;
+        protected SoundEffectInstance onClickedSound;
+        protected Texture2D buttonTexture;
+        protected SpriteFont buttonFont;
 
-        private bool isHovered;
+        protected Color textColor;
+        protected Vector2 areaSize;
+        protected Vector2 textureSize;
+        protected string buttonPathName, hoverSoundPathName, clickSoundPathName;
+        protected float textScale;
 
-        public Ink_Button_Square(Vector2 areaSize, string buttonPathName = "", string hoverSoundPathName = "", string clickSoundPathName = "", OnButtonClicked buttonClickDel = null, float scale = 1f)
+        protected bool isHovered;
+
+        public Ink_Button_Square(Vector2 areaSize, string buttonPathName = "", string hoverSoundPathName = "", string clickSoundPathName = "", OnButtonClicked buttonClickDel = null, float scale = 1f, string buttonMsg = "", Color? textColor = null, float textScale = 1f)
         {
             this.areaSize = areaSize;
             this.buttonPathName = buttonPathName;
@@ -35,12 +43,16 @@ namespace EmotionalBasketGame.Actors.Buttons
             this.clickSoundPathName = clickSoundPathName;
             this.buttonClickDel = buttonClickDel;
             this.Scale = scale;
+            this.ButtonMsg = buttonMsg;
+            this.textColor = (Color)((textColor != null) ? textColor : Color.Black);
+            this.textScale = textScale;
         }
 
         public override void LoadContent(ContentManager content)
         {
             base.LoadContent(content);
 
+            buttonFont = content.Load<SpriteFont>("Umeko");
             if (buttonPathName != "")
             {
                 buttonTexture = content.Load<Texture2D>(buttonPathName);
@@ -56,11 +68,15 @@ namespace EmotionalBasketGame.Actors.Buttons
         {
             base.Draw(gameTime, spriteBatch);
 
+            Vector2 position = GetScreenPosition();
+            float screenScale = GetScreenScale();
             if (buttonTexture != null)
-            {
-                Vector2 position = GetScreenPosition();
-                float screenScale = GetScreenScale();
                 spriteBatch.Draw(buttonTexture, position, new Rectangle(isHovered ? ((int)(textureSize.X*0.5f)) : 0, 0, (int)(textureSize.X*0.5), (int)textureSize.Y), Color.White, 0, new Vector2(textureSize.X*0.25f, textureSize.Y*0.5f), screenScale * Scale, SpriteEffects.None, 0f);
+
+            if (ButtonMsg != "")
+            {
+                Vector2 textSize = buttonFont.MeasureString(ButtonMsg);
+                spriteBatch.DrawString(buttonFont, ButtonMsg, position, textColor, 0f, textSize * 0.5f, textScale, SpriteEffects.None, 0f);
             }
         }
 

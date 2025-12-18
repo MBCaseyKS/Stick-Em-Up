@@ -58,14 +58,28 @@ namespace EmotionalBasketGame.Screens
         /// </summary>
         public Vector2 ScreenOffset { get; set; }
 
+        /// <summary>
+        /// The render priority of this entire screen.
+        /// </summary>
+        public int RenderPriority { get; set; } = 0;
+
+        /// <summary>
+        /// Is called when the screen is closed.
+        /// </summary>
+        /// <param name="screen">The screen closed.</param>
+        public delegate void OnScreenClosed(Ink_GameScreen_Base screen);
+        public OnScreenClosed ScreenClosedDel { get; set; }
+
         // Handles drawing the background.
         protected Texture2D backgroundTexture;
 
-        public Ink_GameScreen_Base(Ink_PinGameManager game)
+        public Ink_GameScreen_Base(Ink_PinGameManager game, int sortPriority = 0)
         {
             Game = game;
+            RenderPriority = sortPriority;
             _actors = new List<Ink_Actor_Base>();
             _screenShakes = new List<Ink_ScreenShake>();
+            UpdateActorSorting();
         }
 
         /// <summary>
@@ -89,7 +103,8 @@ namespace EmotionalBasketGame.Screens
         /// </summary>
         public virtual void OnRemoved()
         {
-            
+            if (ScreenClosedDel != null)
+                ScreenClosedDel(this);
         }
 
         /// <summary>

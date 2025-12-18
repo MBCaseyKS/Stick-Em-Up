@@ -92,6 +92,30 @@
 /processorParam:TextureFormat=Color
 /build:T2D_Button_Back.png
 
+#begin T2D_Button_Basic.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:T2D_Button_Basic.png
+
+#begin T2D_Button_Quit.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:T2D_Button_Quit.png
+
 #begin T2D_Button_SaveConfigs.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -127,6 +151,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:T2D_CreatedBy.png
+
+#begin T2D_MissIcon.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:T2D_MissIcon.png
 
 #begin T2D_PencilMouse.png
 /importer:TextureImporter
@@ -236,6 +272,13 @@
 /processorParam:TextureFormat=Color
 /build:T2D_Titlescreen_Desk.png
 
+#begin Umeko_Big.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Umeko_Big.spritefont
+
 #begin WAV_ArrowShot.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -278,11 +321,29 @@
 /processorParam:Quality=Best
 /build:WAV_Options_Progress.wav
 
+#begin WAV_Stats_Appear.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:WAV_Stats_Appear.wav
+
 #begin WAV_SwitchOn.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:WAV_SwitchOn.wav
+
+#begin WAV_Target_Miss.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:WAV_Target_Miss.wav
+
+#begin WAV_Target_Throw.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:WAV_Target_Throw.wav
 
 #begin WAV_TargetHit.wav
 /importer:WavImporter

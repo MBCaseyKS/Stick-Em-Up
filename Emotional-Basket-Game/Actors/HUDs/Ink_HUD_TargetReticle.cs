@@ -17,6 +17,11 @@ namespace EmotionalBasketGame.Actors.HUDs
     /// </summary>
     public class Ink_HUD_TargetReticle : Ink_HUD_Base
     {
+        /// <summary>
+        /// The round handler.
+        /// </summary>
+        public Ink_TargetRound_Layout RoundHandler { get; set; }
+
         private Vector2 currentPosition;
         private Texture2D _mouseTexture;
         private Texture2D _indicatorTexture;
@@ -97,6 +102,10 @@ namespace EmotionalBasketGame.Actors.HUDs
                 Ink_Dart dart = (Ink_Dart)ActiveScreen.AddActor(new Ink_Dart() { RenderPriority = 100 }, currentPosition + ActiveScreen.ScreenOffset + randOffset, true, -32);
                 if (dart != null)
                 {
+                    if (RoundHandler != null)
+                        RoundHandler.DartsThrown++;
+
+                    dart.RoundHandler = RoundHandler;
                     dart.BeginThrow(chargeAlpha);
                     return dart;
                 }

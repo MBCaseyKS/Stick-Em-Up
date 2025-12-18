@@ -60,11 +60,13 @@ namespace EmotionalBasketGame
         /// </summary>
         /// <param name="screen">The screen to add.</param>
         /// <param name="doLoad">Whether or not to load content.</param>
-        public void AddScreen(Ink_GameScreen_Base screen, bool doLoad)
+        public Ink_GameScreen_Base AddScreen(Ink_GameScreen_Base screen, bool doLoad)
         {
             _screens.Add(screen);
             if (doLoad)
                 screen.LoadContent(_graphics.GraphicsDevice, Content);
+
+            return screen;
         }
 
         /// <summary>
@@ -81,7 +83,7 @@ namespace EmotionalBasketGame
         /// Sets up a new screen.
         /// </summary>
         /// <param name="screen">The screen to add.</param>
-        public void AddScreen(Ink_GameScreen_Base screen) => AddScreen(screen, true);
+        public Ink_GameScreen_Base AddScreen(Ink_GameScreen_Base screen) => AddScreen(screen, true);
 
         /// <summary>
         /// Starts a new load.
@@ -152,14 +154,15 @@ namespace EmotionalBasketGame
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                //Exit();
 
             MusicManager?.Update(gameTime);
             _loadHandler?.Update(gameTime);
 
             //Updates each screen
-            foreach (Ink_GameScreen_Base screen in _screens)
+            var currScreens = _screens.ToArray();
+            foreach (Ink_GameScreen_Base screen in currScreens)
                 screen.Update(gameTime);
 
             var huds = _hudElements.ToArray();
@@ -174,7 +177,8 @@ namespace EmotionalBasketGame
             GraphicsDevice.Clear(Color.Black);
 
             //Draws each screen.
-            foreach (Ink_GameScreen_Base screen in _screens)
+            var sortedScreens = _screens.ToArray().OrderBy(s => s.RenderPriority);
+            foreach (Ink_GameScreen_Base screen in sortedScreens)
                 screen.Draw(_spriteBatch, gameTime);
 
             _loadHandler?.Draw(_spriteBatch, gameTime);
